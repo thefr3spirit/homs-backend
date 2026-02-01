@@ -1,7 +1,7 @@
 """
 Pydantic schemas for request validation and response serialization.
 """
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from datetime import date, datetime
 from typing import Optional
 
@@ -21,6 +21,8 @@ class DailySummaryCreate(BaseModel):
 
 class DailySummaryResponse(BaseModel):
     """Schema for returning daily summary data."""
+    model_config = ConfigDict(from_attributes=True)
+    
     id: str
     date: date
     rooms_total: int
@@ -32,9 +34,6 @@ class DailySummaryResponse(BaseModel):
     expected_balance: float
     expenses_logged: float
     last_updated: datetime
-
-    class Config:
-        orm_mode = True
 
 
 class DailySummaryUpdate(BaseModel):
