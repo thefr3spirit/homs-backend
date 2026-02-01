@@ -13,17 +13,14 @@ Your desktop counter application needs to send daily hotel summary data to our b
 
 ## 🌐 API Endpoint
 
-### Base URL (Testing - Local Network)
+### Base URL (Production - Live!)
 ```
-http://192.168.X.X:8000
+https://homs-backend-txs8.onrender.com
 ```
-*(Replace with actual IP address provided by backend team)*
 
-### Base URL (Production - Coming Soon)
-```
-https://lemi-homs.onrender.com
-```
-*(Will be provided after deployment)*
+### Testing the API
+- Interactive docs: https://homs-backend-txs8.onrender.com/docs
+- Alternative docs: https://homs-backend-txs8.onrender.com/redoc
 
 ---
 
@@ -36,7 +33,7 @@ POST /summary
 
 ### Full URL
 ```
-http://192.168.X.X:8000/summary
+https://homs-backend-txs8.onrender.com/summary
 ```
 
 ### Request Headers

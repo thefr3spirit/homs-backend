@@ -10,7 +10,7 @@ Your desktop counter app needs to send daily hotel summaries to our API at the e
 
 ## 📤 API Endpoint
 
-**URL:** `WILL_BE_PROVIDED_SOON`  
+**URL:** `https://homs-backend-txs8.onrender.com`  
 **Method:** POST  
 **Path:** `/summary`
 
@@ -47,7 +47,7 @@ summary = {
     "expenses_logged": 20000
 }
 
-response = requests.post("API_URL_HERE/summary", json=summary)
+response = requests.post("https://homs-backend-txs8.onrender.com/summary", json=summary)
 print(response.json())
 ```
 
