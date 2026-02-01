@@ -56,8 +56,14 @@ app = FastAPI(
 # Configure CORS
 allowed_origins = os.getenv("ALLOWED_ORIGINS", "").split(",")
 if not allowed_origins or allowed_origins == [""]:
-    # Default to allowing all origins in development
-    allowed_origins = ["*"]
+    # Default origins for development and production
+    allowed_origins = [
+        "http://localhost:8081",       # Gift's dev server
+        "http://localhost:4173",       # Gift's production preview
+        "http://localhost:3000",       # Generic frontend dev
+        "http://localhost:8080",       # Alternative dev port
+        "https://homs-backend-txs8.onrender.com",  # Backend self-reference
+    ]
 
 app.add_middleware(
     CORSMiddleware,
