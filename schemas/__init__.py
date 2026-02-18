@@ -14,7 +14,7 @@ class DailySummaryCreate(BaseModel):
     rooms_available: int
     cash_collected: float
     momo_collected: float
-    cheque_collected: float
+    cheque_collected: float = 0.0
     total_collected: float
     expected_balance: float
     expenses_logged: float
