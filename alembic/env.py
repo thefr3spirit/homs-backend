@@ -18,7 +18,10 @@ load_dotenv()
 
 # Import models and Base
 from database import Base
-from models import DailySummary
+from models import (
+    DailySummary, User, Customer, Room, Booking, 
+    Payment, Expense, AuditLog
+)
 
 # Alembic Config object
 config = context.config

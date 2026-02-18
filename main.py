@@ -10,6 +10,7 @@ from dotenv import load_dotenv
 
 from database import init_db
 from routes import router as summary_router
+from routes.auth import router as auth_router
 
 # Load environment variables
 load_dotenv()
@@ -80,6 +81,8 @@ app.add_middleware(
 
 # Register routers
 app.include_router(summary_router)
+app.include_router(auth_router)
+app.include_router(auth_router, prefix="/auth", tags=["authentication"])
 
 
 @app.get("/", tags=["health"])

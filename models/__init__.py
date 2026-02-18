@@ -6,11 +6,21 @@ from sqlalchemy.sql import func
 from database import Base
 import uuid
 
+# Import all models
+from models.user import User, UserRole
+from models.customer import Customer, CustomerType
+from models.room import Room, RoomType, RoomStatus
+from models.booking import Booking, BookingStatus
+from models.payment import Payment, PaymentMethod, PaymentType, PaymentStatus
+from models.expense import Expense, ExpenseCategory, ExpenseStatus
+from models.audit_log import AuditLog
+
 
 class DailySummary(Base):
     """
     Model representing daily hotel summary data.
     Stores operational metrics submitted by the desktop counter app.
+    KEPT FOR BACKWARD COMPATIBILITY with existing Gift's counter app.
     """
     __tablename__ = "daily_summaries"
 
@@ -38,3 +48,26 @@ class DailySummary(Base):
 
     def __repr__(self):
         return f"<DailySummary(date={self.date}, total_collected={self.total_collected})>"
+
+
+# Export all models
+__all__ = [
+    "User",
+    "UserRole",
+    "Customer",
+    "CustomerType",
+    "Room",
+    "RoomType",
+    "RoomStatus",
+    "Booking",
+    "BookingStatus",
+    "Payment",
+    "PaymentMethod",
+    "PaymentType",
+    "PaymentStatus",
+    "Expense",
+    "ExpenseCategory",
+    "ExpenseStatus",
+    "AuditLog",
+    "DailySummary",
+]
