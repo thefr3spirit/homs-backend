@@ -23,8 +23,12 @@ from models import DailySummary
 # Alembic Config object
 config = context.config
 
-# Set database URL from environment
-config.set_main_option("sqlalchemy.url", os.getenv("DATABASE_URL"))
+# Set database URL from environment (escape % for configparser)
+db_url = os.getenv("DATABASE_URL")
+if db_url:
+    # Replace % with %% for configparser
+    db_url = db_url.replace("%", "%%")
+    config.set_main_option("sqlalchemy.url", db_url)
 
 # Interpret the config file for Python logging
 if config.config_file_name is not None:

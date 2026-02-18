@@ -28,6 +28,7 @@ class DailySummary(Base):
     # Financial data (in local currency)
     cash_collected = Column(Float, nullable=False, default=0.0)
     momo_collected = Column(Float, nullable=False, default=0.0)
+    cheque_collected = Column(Float, nullable=False, default=0.0)
     total_collected = Column(Float, nullable=False, default=0.0)
     expected_balance = Column(Float, nullable=False, default=0.0)
     expenses_logged = Column(Float, nullable=False, default=0.0)

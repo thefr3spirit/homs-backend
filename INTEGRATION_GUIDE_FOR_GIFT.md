@@ -50,8 +50,9 @@ Content-Type: application/json
   "rooms_available": 12,
   "cash_collected": 350000.00,
   "momo_collected": 120000.00,
-  "total_collected": 470000.00,
-  "expected_balance": 470000.00,
+  "cheque_collected": 50000.00,
+  "total_collected": 520000.00,
+  "expected_balance": 520000.00,
   "expenses_logged": 20000.00
 }
 ```
@@ -66,7 +67,8 @@ Content-Type: application/json
 | `rooms_available` | integer | Yes | Number of available rooms |
 | `cash_collected` | float | Yes | Amount collected in cash (local currency) |
 | `momo_collected` | float | Yes | Amount collected via mobile money |
-| `total_collected` | float | Yes | Total amount collected (cash + momo) |
+| `cheque_collected` | float | Yes | Amount collected via cheque |
+| `total_collected` | float | Yes | Total amount collected (cash + momo + cheque) |
 | `expected_balance` | float | Yes | Expected balance for the day |
 | `expenses_logged` | float | Yes | Total expenses logged for the day |
 

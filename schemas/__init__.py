@@ -14,6 +14,7 @@ class DailySummaryCreate(BaseModel):
     rooms_available: int
     cash_collected: float
     momo_collected: float
+    cheque_collected: float
     total_collected: float
     expected_balance: float
     expenses_logged: float
@@ -30,6 +31,7 @@ class DailySummaryResponse(BaseModel):
     rooms_available: int
     cash_collected: float
     momo_collected: float
+    cheque_collected: float
     total_collected: float
     expected_balance: float
     expenses_logged: float
@@ -43,6 +45,7 @@ class DailySummaryUpdate(BaseModel):
     rooms_available: Optional[int] = None
     cash_collected: Optional[float] = None
     momo_collected: Optional[float] = None
+    cheque_collected: Optional[float] = None
     total_collected: Optional[float] = None
     expected_balance: Optional[float] = None
     expenses_logged: Optional[float] = None
