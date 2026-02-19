@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '004_add_tracking_to_daily_summaries'
+revision = '004_daily_summary_tracking'
 down_revision = '003_add_user_tracking'
 branch_labels = None
 depends_on = None
