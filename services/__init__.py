@@ -15,7 +15,7 @@ class SummaryService:
     """Service class for daily summary operations."""
 
     @staticmethod
-    def create_summary(db: Session, summary_data: DailySummaryCreate) -> DailySummary:
+    def create_summary(db: Session, summary_data: DailySummaryCreate, user_id: str = None) -> DailySummary:
         """
         Create a new daily summary.
         If a summary for the date already exists, update it instead.
@@ -27,12 +27,18 @@ class SummaryService:
             # Update existing summary
             for key, value in summary_data.model_dump().items():
                 setattr(existing, key, value)
+            if user_id:
+                existing.updated_by = user_id
             db.commit()
             db.refresh(existing)
             return existing
         
         # Create new summary
-        db_summary = DailySummary(**summary_data.model_dump())
+        summary_dict = summary_data.model_dump()
+        if user_id:
+            summary_dict['created_by'] = user_id
+            summary_dict['updated_by'] = user_id
+        db_summary = DailySummary(**summary_dict)
         db.add(db_summary)
         db.commit()
         db.refresh(db_summary)

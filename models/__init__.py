@@ -1,7 +1,7 @@
 """
 SQLAlchemy models for Lemi Hotel Management System.
 """
-from sqlalchemy import Column, String, Integer, Float, Date, DateTime
+from sqlalchemy import Column, String, Integer, Float, Date, DateTime, ForeignKey
 from sqlalchemy.sql import func
 from database import Base
 import uuid
@@ -42,6 +42,10 @@ class DailySummary(Base):
     total_collected = Column(Float, nullable=False, default=0.0)
     expected_balance = Column(Float, nullable=False, default=0.0)
     expenses_logged = Column(Float, nullable=False, default=0.0)
+    
+    # User tracking (who submitted/updated summary)
+    created_by = Column(String, ForeignKey("users.id"), nullable=True)
+    updated_by = Column(String, ForeignKey("users.id"), nullable=True)
     
     # Timestamp tracking
     last_updated = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())

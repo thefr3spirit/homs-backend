@@ -7,6 +7,7 @@ from typing import List
 from datetime import date
 
 from database import get_db
+from models.user import User
 from schemas import (
     DailySummaryCreate,
     DailySummaryResponse,
@@ -14,12 +15,30 @@ from schemas import (
     ErrorResponse
 )
 from services import SummaryService
+from middleware.auth import get_current_user
 
 # Create router
 router = APIRouter(
     prefix="/summary",
     tags=["summary"]
 )
+
+
+def add_user_names_to_summary(summary, db):
+    """Helper function to add user names to summary response."""
+    from models.user import User
+    
+    if summary.created_by:
+        creator = db.query(User).filter(User.id == summary.created_by).first()
+        summary.created_by_name = creator.full_name if creator else None
+    else:
+        summary.created_by_name = None
+    
+    if summary.updated_by:
+        updater = db.query(User).filter(User.id == summary.updated_by).first()
+        summary.updated_by_name = updater.full_name if updater else None
+    else:
+        summary.updated_by_name = None
 
 
 @router.post(
@@ -31,6 +50,7 @@ router = APIRouter(
 )
 def create_summary(
     summary: DailySummaryCreate,
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """
@@ -47,7 +67,8 @@ def create_summary(
     - **expenses_logged**: Logged expenses
     """
     try:
-        db_summary = SummaryService.create_summary(db, summary)
+        db_summary = SummaryService.create_summary(db, summary, user_id=current_user.id)
+        add_user_names_to_summary(db_summary, db)
         return db_summary
     except Exception as e:
         raise HTTPException(
@@ -75,6 +96,7 @@ def get_today_summary(db: Session = Depends(get_db)):
             detail=f"No summary found for today ({date.today()})"
         )
     
+    add_user_names_to_summary(summary, db)
     return summary
 
 
@@ -97,6 +119,7 @@ def get_latest_summary(db: Session = Depends(get_db)):
             detail="No summaries found in database"
         )
     
+    add_user_names_to_summary(summary, db)
     return summary
 
 
@@ -120,6 +143,8 @@ def get_summary_history(
     Returns summaries ordered by date (most recent first).
     """
     summaries = SummaryService.get_summary_history(db, limit=limit, offset=offset)
+    for summary in summaries:
+        add_user_names_to_summary(summary, db)
     return summaries
 
 
@@ -146,6 +171,7 @@ def get_summary_by_date(
             detail=f"No summary found for date {summary_date}"
         )
     
+    add_user_names_to_summary(summary, db)
     return summary
 
 
@@ -173,6 +199,8 @@ def get_date_range_summaries(
         )
     
     summaries = SummaryService.get_date_range_summaries(db, start_date, end_date)
+    for summary in summaries:
+        add_user_names_to_summary(summary, db)
     return summaries
 
 

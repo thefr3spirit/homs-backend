@@ -36,6 +36,10 @@ class DailySummaryResponse(BaseModel):
     expected_balance: float
     expenses_logged: float
     last_updated: datetime
+    created_by: Optional[str] = None
+    updated_by: Optional[str] = None
+    created_by_name: Optional[str] = None
+    updated_by_name: Optional[str] = None
 
 
 class DailySummaryUpdate(BaseModel):
