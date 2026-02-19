@@ -7,6 +7,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 import os
 from dotenv import load_dotenv
+from alembic.config import Config
+from alembic import command
 
 from database import init_db
 from routes import router as summary_router
@@ -20,13 +22,28 @@ from routes.payments import router as payments_router
 load_dotenv()
 
 
+def run_migrations():
+    """Run Alembic migrations on startup."""
+    try:
+        print("🔄 Running database migrations...")
+        alembic_cfg = Config("alembic.ini")
+        command.upgrade(alembic_cfg, "head")
+        print("✅ Migrations completed successfully")
+    except Exception as e:
+        print(f"⚠️  Migration warning: {e}")
+        # Don't fail startup if migrations have issues
+        # This allows the app to start even if migrations were already run
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """
     Lifespan context manager for startup and shutdown events.
-    Initializes database tables on startup.
+    Runs migrations and initializes database tables on startup.
     """
     # Startup
+    print("🚀 Starting Lemi Hotel Management System...")
+    run_migrations()
     print("🚀 Initializing database...")
     init_db()
     print("✅ Database initialized successfully")
