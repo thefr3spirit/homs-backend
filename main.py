@@ -17,6 +17,7 @@ from routes.customers import router as customers_router
 from routes.rooms import router as rooms_router
 from routes.bookings import router as bookings_router
 from routes.payments import router as payments_router
+from routes.admin import router as admin_router
 
 # Load environment variables
 load_dotenv()
@@ -107,6 +108,7 @@ app.include_router(customers_router)
 app.include_router(rooms_router)
 app.include_router(bookings_router)
 app.include_router(payments_router)
+app.include_router(admin_router)
 app.include_router(auth_router, prefix="/auth", tags=["authentication"])
 
 
