@@ -12,7 +12,7 @@ class UserRole(str, enum.Enum):
     """User role enumeration."""
     OWNER = "owner"
     RECEPTIONIST = "receptionist"
-    ACCOUNTANT = "accountant"
+    ADMIN = "admin"
 
 
 class User(Base):

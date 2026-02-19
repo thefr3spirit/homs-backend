@@ -39,7 +39,7 @@ class Expense(Base):
     
     # Foreign keys
     recorded_by = Column(String, ForeignKey("users.id"), nullable=False)  # Who recorded the expense
-    approved_by = Column(String, ForeignKey("users.id"), nullable=True)  # Who approved (owner/accountant)
+    approved_by = Column(String, ForeignKey("users.id"), nullable=True)  # Who approved (owner/admin)
     
     # Expense details
     category = Column(SQLEnum(ExpenseCategory), nullable=False, index=True)

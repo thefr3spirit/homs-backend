@@ -62,7 +62,7 @@ def register_user(
     current_user: User = Depends(get_current_user)
 ):
     """
-    Register a new user (receptionist/accountant).
+    Register a new user (receptionist/admin).
     Only accessible by OWNER role.
     """
     # Check if email already exists
