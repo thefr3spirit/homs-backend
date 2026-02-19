@@ -20,6 +20,23 @@ from middleware.auth import get_current_user, require_role
 router = APIRouter(prefix="/bookings", tags=["bookings"])
 
 
+def add_user_names_to_booking(booking: Booking, db: Session) -> Booking:
+    """Helper function to add user names to a booking object."""
+    if booking.created_by:
+        creator = db.query(User).filter(User.id == booking.created_by).first()
+        booking.created_by_name = creator.full_name if creator else None
+    
+    if booking.checked_in_by:
+        checker_in = db.query(User).filter(User.id == booking.checked_in_by).first()
+        booking.checked_in_by_name = checker_in.full_name if checker_in else None
+    
+    if booking.checked_out_by:
+        checker_out = db.query(User).filter(User.id == booking.checked_out_by).first()
+        booking.checked_out_by_name = checker_out.full_name if checker_out else None
+    
+    return booking
+
+
 @router.post("/", response_model=BookingResponse, status_code=status.HTTP_201_CREATED)
 def create_booking(
     booking_data: BookingCreate,
@@ -90,6 +107,9 @@ def create_booking(
     db.commit()
     db.refresh(booking)
     
+    # Add user names
+    booking = add_user_names_to_booking(booking, db)
+    
     return booking
 
 
@@ -127,6 +147,10 @@ def list_bookings(
     
     # Apply pagination
     bookings = query.order_by(Booking.created_at.desc()).offset((page - 1) * page_size).limit(page_size).all()
+    
+    # Add user names to each booking
+    for booking in bookings:
+        add_user_names_to_booking(booking, db)
     
     return {
         "bookings": bookings,
@@ -203,6 +227,9 @@ def get_booking(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Booking not found"
         )
+    
+    # Add user names
+    booking = add_user_names_to_booking(booking, db)
     
     return booking
 

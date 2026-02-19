@@ -21,6 +21,15 @@ from middleware.auth import get_current_user, require_role
 router = APIRouter(prefix="/payments", tags=["payments"])
 
 
+def add_user_name_to_payment(payment: Payment, db: Session) -> Payment:
+    """Helper function to add user name to a payment object."""
+    if payment.received_by:
+        receiver = db.query(User).filter(User.id == payment.received_by).first()
+        payment.received_by_name = receiver.full_name if receiver else None
+    
+    return payment
+
+
 @router.post("/", response_model=PaymentResponse, status_code=status.HTTP_201_CREATED)
 def record_payment(
     payment_data: PaymentCreate,
@@ -102,6 +111,9 @@ def record_payment(
     db.commit()
     db.refresh(payment)
     
+    # Add user name
+    payment = add_user_name_to_payment(payment, db)
+    
     return payment
 
 
@@ -150,6 +162,10 @@ def list_payments(
     
     # Apply pagination
     payments = query.order_by(Payment.payment_date.desc()).offset((page - 1) * page_size).limit(page_size).all()
+    
+    # Add user names to each payment
+    for payment in payments:
+        add_user_name_to_payment(payment, db)
     
     return {
         "payments": payments,

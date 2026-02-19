@@ -27,6 +27,7 @@ class PaymentResponse(PaymentBase):
     """Schema for payment response."""
     id: str
     received_by: str
+    received_by_name: Optional[str] = None  # Name of user who received payment
     payment_date: datetime
     status: PaymentStatus
     created_at: datetime

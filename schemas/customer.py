@@ -42,6 +42,10 @@ class CustomerResponse(CustomerBase):
     total_visits: int
     created_at: datetime
     updated_at: Optional[datetime]
+    created_by: Optional[str] = None
+    updated_by: Optional[str] = None
+    created_by_name: Optional[str] = None  # Name of user who created
+    updated_by_name: Optional[str] = None  # Name of user who last updated
 
     class Config:
         from_attributes = True

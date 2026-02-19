@@ -48,6 +48,11 @@ class BookingResponse(BookingBase):
     created_at: datetime
     updated_at: Optional[datetime]
     
+    # User names
+    created_by_name: Optional[str] = None
+    checked_in_by_name: Optional[str] = None
+    checked_out_by_name: Optional[str] = None
+    
     # Computed field
     balance_due: float
 

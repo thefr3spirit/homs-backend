@@ -1,7 +1,7 @@
 """
 Room model for hotel room inventory.
 """
-from sqlalchemy import Column, String, Integer, Float, Enum as SQLEnum, JSON
+from sqlalchemy import Column, String, Integer, Float, DateTime, Enum as SQLEnum, JSON, ForeignKey
 from sqlalchemy.sql import func
 from database import Base
 import uuid
@@ -49,6 +49,14 @@ class Room(Base):
     # Description
     description = Column(String, nullable=True)
     amenities = Column(JSON, nullable=True)  # ["WiFi", "TV", "AC", "Mini Bar"]
+    
+    # User tracking
+    created_by = Column(String, ForeignKey("users.id"), nullable=True)  # Who created this room
+    updated_by = Column(String, ForeignKey("users.id"), nullable=True)  # Who last updated this room
+    
+    # Timestamps
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     
     def __repr__(self):
         return f"<Room(number={self.room_number}, type={self.room_type}, status={self.status})>"

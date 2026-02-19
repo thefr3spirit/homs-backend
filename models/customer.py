@@ -1,7 +1,7 @@
 """
 Customer model for guest information and balance tracking.
 """
-from sqlalchemy import Column, String, Integer, Float, DateTime, Enum as SQLEnum
+from sqlalchemy import Column, String, Integer, Float, DateTime, Enum as SQLEnum, ForeignKey
 from sqlalchemy.sql import func
 from database import Base
 import uuid
@@ -35,7 +35,11 @@ class Customer(Base):
     # Classification
     customer_type = Column(SQLEnum(CustomerType), default=CustomerType.REGULAR, nullable=False)
     
-   # Financial tracking
+    # User tracking
+    created_by = Column(String, ForeignKey("users.id"), nullable=True)  # Who created this customer
+    updated_by = Column(String, ForeignKey("users.id"), nullable=True)  # Who last updated this customer
+    
+    # Financial tracking
     total_spent = Column(Float, default=0.0, nullable=False)  # Lifetime spending
     pending_balance = Column(Float, default=0.0, nullable=False)  # Amount owed
     total_visits = Column(Integer, default=0, nullable=False)

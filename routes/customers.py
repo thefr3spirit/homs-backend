@@ -47,10 +47,17 @@ def create_customer(
                 detail=f"Customer with email {customer_data.email} already exists"
             )
     
-    customer = Customer(**customer_data.model_dump())
+    # Create customer with user tracking
+    customer = Customer(
+        **customer_data.model_dump(),
+        created_by=current_user.id
+    )
     db.add(customer)
     db.commit()
     db.refresh(customer)
+    
+    # Add creator name for response
+    customer.created_by_name = current_user.full_name
     
     return customer
 
@@ -98,6 +105,16 @@ def list_customers(
     
     # Apply pagination
     customers = query.order_by(Customer.created_at.desc()).offset((page - 1) * page_size).limit(page_size).all()
+    
+    # Add user names for each customer
+    for customer in customers:
+        if customer.created_by:
+            creator = db.query(User).filter(User.id == customer.created_by).first()
+            customer.created_by_name = creator.full_name if creator else None
+        
+        if customer.updated_by:
+            updater = db.query(User).filter(User.id == customer.updated_by).first()
+            customer.updated_by_name = updater.full_name if updater else None
     
     return {
         "customers": customers,
@@ -155,6 +172,15 @@ def get_customer(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Customer not found"
         )
+    
+    # Add user names for who created/updated
+    if customer.created_by:
+        creator = db.query(User).filter(User.id == customer.created_by).first()
+        customer.created_by_name = creator.full_name if creator else None
+    
+    if customer.updated_by:
+        updater = db.query(User).filter(User.id == customer.updated_by).first()
+        customer.updated_by_name = updater.full_name if updater else None
     
     return customer
 
@@ -239,9 +265,13 @@ def update_customer(
         setattr(customer, field, value)
     
     customer.updated_at = datetime.utcnow()
+    customer.updated_by = current_user.id
     
     db.commit()
     db.refresh(customer)
+    
+    # Add updater name for response
+    customer.updated_by_name = current_user.full_name
     
     return customer
 
