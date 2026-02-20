@@ -1,7 +1,7 @@
 """add tracking to daily_summaries
 
 Revision ID: 004_add_tracking_to_daily_summaries
-Revises: 003_add_user_tracking
+Revises: 003_user_tracking
 Create Date: 2026-02-19
 
 """
@@ -11,7 +11,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = '004_daily_summary_tracking'
-down_revision = '003_add_user_tracking'
+down_revision = '003_user_tracking'
 branch_labels = None
 depends_on = None
 

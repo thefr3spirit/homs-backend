@@ -23,6 +23,11 @@ This document provides comprehensive API documentation for the Hotel Management 
 
 All API endpoints (except login) require JWT authentication.
 
+**User Roles:**  
+- **Owner** - Full system access, can delete records and manage all operations
+- **Receptionist** - Daily operations: bookings, check-in/out, payments, customer management
+- **Admin** - Elevated staff role with extended permissions
+
 ### Login
 
 **Endpoint:** `POST /auth/login`
@@ -30,7 +35,7 @@ All API endpoints (except login) require JWT authentication.
 **Request:**
 ```json
 {
-  "username": "your_username",
+  "email": "receptionist@lemihotel.com",
   "password": "your_password"
 }
 ```
@@ -40,12 +45,10 @@ All API endpoints (except login) require JWT authentication.
 {
   "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
   "token_type": "bearer",
-  "user": {
-    "id": "uuid-here",
-    "username": "your_username",
-    "full_name": "Your Full Name",
-    "role": "receptionist"
-  }
+  "user_id": "uuid-here",
+  "email": "receptionist@lemihotel.com",
+  "full_name": "Receptionist Name",
+  "role": "receptionist"
 }
 ```
 
@@ -54,6 +57,8 @@ Include in all subsequent requests:
 ```
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 ```
+
+**Important:** Login requires **email** (not username) and password.
 
 ---
 
@@ -504,9 +509,9 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 ```python
 import requests
 
-# Login
-response = requests.post('https://your-api.com/auth/login', json={
-    'username': 'receptionist',
+# Login (use EMAIL, not username)
+response = requests.post('https://homs-backend-txs8.onrender.com/auth/login', json={
+    'email': 'receptionist@lemihotel.com',
     'password': 'your-password'
 })
 token = response.json()['access_token']
@@ -521,7 +526,7 @@ headers = {
 ### Create Customer
 
 ```python
-response = requests.post('https://your-api.com/customers/', 
+response = requests.post('https://homs-backend-txs8.onrender.com/customers/', 
     headers=headers,
     json={
         'name': 'Jane Doe',
@@ -539,7 +544,7 @@ print(f"Added by: {customer['created_by_name']}")
 ### Create Booking
 
 ```python
-response = requests.post('https://your-api.com/bookings/',
+response = requests.post('https://homs-backend-txs8.onrender.com/bookings/',
     headers=headers,
     json={
         'customer_id': customer['id'],
@@ -558,7 +563,7 @@ print(f"Booking created by: {booking['created_by_name']}")
 ### Record Payment
 
 ```python
-response = requests.post('https://your-api.com/payments/',
+response = requests.post('https://homs-backend-txs8.onrender.com/payments/',
     headers=headers,
     json={
         'booking_id': booking['id'],
@@ -639,8 +644,8 @@ All endpoints return standard HTTP status codes:
 
 For questions or issues:
 - Contact backend developer
-- Check `/docs` endpoint for interactive API documentation (Swagger UI)
-- Check `/redoc` endpoint for alternative documentation view
+- Check `https://homs-backend-txs8.onrender.com/docs` for interactive API documentation (Swagger UI)
+- Check `https://homs-backend-txs8.onrender.com/redoc` for alternative documentation view
 
 ---
 
@@ -661,9 +666,11 @@ For questions or issues:
 ✅ No extra code needed - just authenticate and send data  
 ✅ Old approach (daily summaries only) still works perfectly
 
-**Migration needed:**
+**Migration Status:**
 
-The backend has been updated (February 19, 2026) to support these new features. A database migration needs to run to add user tracking columns. Contact the owner to run the migration via the `/admin/run-migrations` endpoint.
+The backend has been updated (February 19, 2026) with migration **004_daily_summary_tracking** which adds user tracking columns (`created_by`, `updated_by`) to the daily_summaries table. This migration should already be applied, but if you encounter issues, contact the owner to run it via the `/admin/run-migrations` endpoint.
+
+**API Base URL:** `https://homs-backend-txs8.onrender.com`
 
 ---
 

@@ -14,6 +14,7 @@ from database import init_db
 from routes import router as summary_router
 from routes.auth import router as auth_router
 from routes.customers import router as customers_router
+from routes.customer_balance import router as customer_balance_router
 from routes.rooms import router as rooms_router
 from routes.bookings import router as bookings_router
 from routes.payments import router as payments_router
@@ -105,6 +106,7 @@ app.add_middleware(
 app.include_router(summary_router)
 app.include_router(auth_router)
 app.include_router(customers_router)
+app.include_router(customer_balance_router)
 app.include_router(rooms_router)
 app.include_router(bookings_router)
 app.include_router(payments_router)

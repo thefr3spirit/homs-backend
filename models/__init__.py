@@ -9,6 +9,7 @@ import uuid
 # Import all models
 from models.user import User, UserRole
 from models.customer import Customer, CustomerType
+from models.customer_balance import CustomerBalance
 from models.room import Room, RoomType, RoomStatus
 from models.booking import Booking, BookingStatus
 from models.payment import Payment, PaymentMethod, PaymentType, PaymentStatus
