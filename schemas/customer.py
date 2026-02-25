@@ -14,6 +14,7 @@ class CustomerBase(BaseModel):
     phone: str
     id_number: Optional[str] = None
     address: Optional[str] = None
+    emergency_contact: Optional[str] = None
     customer_type: CustomerType = CustomerType.REGULAR
     notes: Optional[str] = None
 
@@ -30,6 +31,7 @@ class CustomerUpdate(BaseModel):
     phone: Optional[str] = None
     id_number: Optional[str] = None
     address: Optional[str] = None
+    emergency_contact: Optional[str] = None
     customer_type: Optional[CustomerType] = None
     notes: Optional[str] = None
 

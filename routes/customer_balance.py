@@ -1,6 +1,6 @@
 """
 Customer balance tracking routes for mobile app.
-This handles the separate customer_balance table that the desktop PWA writes to.
+Updated to query directly from customers table instead of customer_balance table.
 """
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
@@ -9,17 +9,14 @@ from typing import List
 
 from database import get_db
 from models.user import User
-from models.customer_balance import CustomerBalance
-from schemas.customer_balance import (
-    CustomerBalanceResponse,
-    CustomerBalanceSummary
-)
+from models.customer import Customer
+from schemas.customer import CustomerResponse
 from middleware.auth import get_current_user
 
 router = APIRouter(prefix="/customer-balances", tags=["customer-balances"])
 
 
-@router.get("/", response_model=List[CustomerBalanceResponse])
+@router.get("/", response_model=List[CustomerResponse])
 def get_customer_balances(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
@@ -28,15 +25,17 @@ def get_customer_balances(
     Get all customers with outstanding balances.
     Returns customers ordered by balance amount (highest first).
     Used by mobile app to display pending balances list.
-    """
-    balances = db.query(CustomerBalance).filter(
-        CustomerBalance.balance_amount > 0
-    ).order_by(CustomerBalance.balance_amount.desc()).all()
     
-    return balances
+    NOW QUERIES FROM CUSTOMERS TABLE (pending_balance > 0)
+    """
+    customers = db.query(Customer).filter(
+        Customer.pending_balance > 0
+    ).order_by(Customer.pending_balance.desc()).all()
+    
+    return customers
 
 
-@router.get("/total", response_model=CustomerBalanceSummary)
+@router.get("/total")
 def get_balance_summary(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
@@ -45,12 +44,14 @@ def get_balance_summary(
     Get summary of pending balances: count and total amount.
     Used by mobile app dashboard for quick overview.
     Returns {customer_count: 0, total_pending: 0} if no balances exist.
+    
+    NOW QUERIES FROM CUSTOMERS TABLE (pending_balance > 0)
     """
     result = db.query(
-        func.count(CustomerBalance.id).label('count'),
-        func.coalesce(func.sum(CustomerBalance.balance_amount), 0).label('total')
+        func.count(Customer.id).label('count'),
+        func.coalesce(func.sum(Customer.pending_balance), 0).label('total')
     ).filter(
-        CustomerBalance.balance_amount > 0
+        Customer.pending_balance > 0
     ).first()
     
     return {
@@ -59,21 +60,23 @@ def get_balance_summary(
     }
 
 
-@router.get("/{balance_id}", response_model=CustomerBalanceResponse)
+@router.get("/{customer_id}", response_model=CustomerResponse)
 def get_customer_balance(
-    balance_id: int,
+    customer_id: str,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """
-    Get a specific customer balance record by ID.
-    """
-    balance = db.query(CustomerBalance).filter(CustomerBalance.id == balance_id).first()
+    Get a specific customer's balance information by customer ID.
     
-    if not balance:
+    NOW QUERIES FROM CUSTOMERS TABLE
+    """
+    customer = db.query(Customer).filter(Customer.id == customer_id).first()
+    
+    if not customer:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Customer balance record with ID {balance_id} not found"
+            detail=f"Customer with ID {customer_id} not found"
         )
     
-    return balance
+    return customer

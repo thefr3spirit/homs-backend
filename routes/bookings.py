@@ -3,6 +3,7 @@ Booking management routes with receptionist tracking.
 """
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 from typing import Optional
 from datetime import date, datetime
 
@@ -18,6 +19,41 @@ from schemas.booking import (
 from middleware.auth import get_current_user, require_role
 
 router = APIRouter(prefix="/bookings", tags=["bookings"])
+
+
+def recalculate_customer_pending_balance(customer_id: str, db: Session) -> None:
+    """
+    Recalculate customer's pending balance as the sum of all balance_due
+    from their bookings.
+    
+    This should be called after:
+    - Creating a booking
+    - Recording a payment
+    - Checking out a booking
+    - Canceling a booking
+    """
+    # Calculate total pending balance from all bookings
+    # balance_due = total_amount - amount_paid for each booking
+    total_pending = db.query(
+        func.coalesce(
+            func.sum(Booking.total_amount - Booking.amount_paid),
+            0.0
+        )
+    ).filter(
+        Booking.customer_id == customer_id,
+        Booking.booking_status.in_([
+            BookingStatus.PENDING,
+            BookingStatus.CONFIRMED,
+            BookingStatus.CHECKED_IN,
+            BookingStatus.CHECKED_OUT
+        ]),
+        (Booking.total_amount - Booking.amount_paid) > 0.01  # Only include bookings with balance > 0
+    ).scalar() or 0.0
+    
+    # Update customer's pending balance
+    customer = db.query(Customer).filter(Customer.id == customer_id).first()
+    if customer:
+        customer.pending_balance = float(total_pending)
 
 
 def add_user_names_to_booking(booking: Booking, db: Session) -> Booking:
@@ -106,6 +142,10 @@ def create_booking(
     db.add(booking)
     db.commit()
     db.refresh(booking)
+    
+    # Recalculate customer's pending balance
+    recalculate_customer_pending_balance(customer.id, db)
+    db.commit()
     
     # Add user names
     booking = add_user_names_to_booking(booking, db)
@@ -385,12 +425,8 @@ def checkout_guest(
     if room:
         room.status = RoomStatus.CLEANING
     
-    # Update customer pending balance
-    balance_due = booking.total_amount - booking.amount_paid
-    if balance_due > 0:
-        customer = db.query(Customer).filter(Customer.id == booking.customer_id).first()
-        if customer:
-            customer.pending_balance += balance_due
+    # Recalculate customer's pending balance
+    recalculate_customer_pending_balance(booking.customer_id, db)
     
     db.commit()
     db.refresh(booking)
@@ -436,11 +472,8 @@ def cancel_booking(
     if room and room.status == RoomStatus.RESERVED:
         room.status = RoomStatus.AVAILABLE
     
-    # Refund any deposits to customer
-    if booking.amount_paid > 0:
-        customer = db.query(Customer).filter(Customer.id == booking.customer_id).first()
-        if customer:
-            customer.pending_balance -= booking.amount_paid  # Credit back
+    # Recalculate customer's pending balance (cancelled bookings won't count)
+    recalculate_customer_pending_balance(booking.customer_id, db)
     
     db.commit()
     

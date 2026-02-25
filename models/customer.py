@@ -31,6 +31,7 @@ class Customer(Base):
     phone = Column(String, nullable=False, index=True)
     id_number = Column(String, nullable=True)  # National ID or passport
     address = Column(String, nullable=True)
+    emergency_contact = Column(String, nullable=True)  # Emergency contact phone/name
     
     # Classification
     customer_type = Column(SQLEnum(CustomerType), default=CustomerType.REGULAR, nullable=False)

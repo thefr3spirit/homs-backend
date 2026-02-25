@@ -10,7 +10,7 @@ from datetime import date, datetime
 from database import get_db
 from models.user import User, UserRole
 from models.payment import Payment, PaymentMethod, PaymentType, PaymentStatus
-from models.booking import Booking
+from models.booking import Booking, BookingStatus
 from models.customer import Customer
 from schemas.payment import (
     PaymentCreate, PaymentResponse,
@@ -19,6 +19,41 @@ from schemas.payment import (
 from middleware.auth import get_current_user, require_role
 
 router = APIRouter(prefix="/payments", tags=["payments"])
+
+
+def recalculate_customer_pending_balance(customer_id: str, db: Session) -> None:
+    """
+    Recalculate customer's pending balance as the sum of all balance_due
+    from their bookings.
+    
+    This should be called after:
+    - Creating a booking
+    - Recording a payment
+    - Checking out a booking
+    - Canceling a booking
+    """
+    # Calculate total pending balance from all bookings
+    # balance_due = total_amount - amount_paid for each booking
+    total_pending = db.query(
+        func.coalesce(
+            func.sum(Booking.total_amount - Booking.amount_paid),
+            0.0
+        )
+    ).filter(
+        Booking.customer_id == customer_id,
+        Booking.booking_status.in_([
+            BookingStatus.PENDING,
+            BookingStatus.CONFIRMED,
+            BookingStatus.CHECKED_IN,
+            BookingStatus.CHECKED_OUT
+        ]),
+        (Booking.total_amount - Booking.amount_paid) > 0.01  # Only include bookings with balance > 0
+    ).scalar() or 0.0
+    
+    # Update customer's pending balance
+    customer = db.query(Customer).filter(Customer.id == customer_id).first()
+    if customer:
+        customer.pending_balance = float(total_pending)
 
 
 def add_user_name_to_payment(payment: Payment, db: Session) -> Payment:
@@ -93,23 +128,21 @@ def record_payment(
     # Update booking amount paid
     booking.amount_paid += payment_data.amount
     
-    # Update customer financials
+    # Update customer total spent
     if payment_data.payment_type == PaymentType.REFUND:
-        # Refund reduces total spent and pending balance
+        # Refund reduces total spent
         customer.total_spent -= payment_data.amount
-        customer.pending_balance += payment_data.amount
     else:
         # Regular payment increases total spent
         customer.total_spent += payment_data.amount
-        
-        # If customer had pending balance, reduce it
-        if customer.pending_balance > 0:
-            reduction = min(payment_data.amount, customer.pending_balance)
-            customer.pending_balance -= reduction
     
     db.add(payment)
     db.commit()
     db.refresh(payment)
+    
+    # Recalculate customer's pending balance based on all bookings
+    recalculate_customer_pending_balance(customer.id, db)
+    db.commit()
     
     # Add user name
     payment = add_user_name_to_payment(payment, db)
