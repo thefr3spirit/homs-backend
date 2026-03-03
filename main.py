@@ -82,12 +82,14 @@ allowed_origins_str = os.getenv("ALLOWED_ORIGINS", "")
 if allowed_origins_str:
     allowed_origins = [origin.strip() for origin in allowed_origins_str.split(",") if origin.strip()]
 else:
-    # Default origins for development
+    # Default origins for development and production
     allowed_origins = [
         "http://localhost:8081",       # Gift's dev server
         "http://localhost:4173",       # Gift's production preview
+        "http://localhost:5173",       # Vite default dev
         "http://localhost:3000",       # Generic frontend dev
         "http://localhost:8080",       # Alternative dev port
+        "https://hotel-operations-hub.vercel.app",  # Gift's production PWA
     ]
 
 print(f"🌐 CORS enabled for origins: {allowed_origins}")
@@ -96,8 +98,8 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=allowed_origins,
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allow_headers=["Content-Type", "Authorization", "Accept", "Origin"],
+    allow_methods=["*"],
+    allow_headers=["*"],
     expose_headers=["*"],
     max_age=3600,
 )
